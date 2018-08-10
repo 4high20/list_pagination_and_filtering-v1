@@ -42,11 +42,11 @@ function appendPageLinks(studentList){
     }
   }
   //when a link to a page is clicked call the showPage function to display the correct students and update the page links css:
-  updateCss(studentItem);
+  updatePage(studentItem);
 }
 
 //this function call the showPage function to generate the right page based on which page the user clicks
-function updateCss(studentList){
+function updatePage(studentList){
   $('.pagination ul li').on('click', 'a', function(){
     showPage($(this).text(), studentList)
     $('.pagination ul li a').removeClass('active');
@@ -57,26 +57,36 @@ function updateCss(studentList){
 //call appendPageLinks to initialize the pages links based on number of students in the list
 appendPageLinks(studentItem);
 
-//add a search component to the page for the browsers that support javascript
-$('.page-header').append('<div class="student-search"><input placeholder="Search for students..."><button>Search</button></div>');
-
-//listen for the click on the search button
-$('.student-search button').on('click', function(){
-  //create a variable to store the text entered in the search input
-  let inputValue = $('.student-search input').val().toLowerCase();
-  //filter the elements shown on the page based on text entered by the user
-  $('.student-item').filter(function(){
-    $(this).toggle($(this).text().toLowerCase().indexOf(inputValue) > -1);
-  });
-  //assign to the jquery object containing the list of all students a new list
-  //with only filtered students
-  studentItem = $('.student-item:visible');
+//this function shows a message to the user if the student searched is not found
+function notFound(){
   //clear h3 not found
   $('.notfound').remove();
   //if no user is found show a message to the user
   if($('.student-item:visible').length === 0){
     $('.page').append('<h3 class="notfound">Student Not Found</h3>');
   }
+}
+
+//this function filter the students based on the input search value
+function filterStudent(student){
+  //create a variable to store the text entered in the search input
+  let inputValue = $('.student-search input').val().toLowerCase();
+  //filter the elements shown on the page based on text entered by the user
+  $('.student-details').filter(function(){
+    $(this).parent().toggle($(this).text().toLowerCase().indexOf(inputValue) > -1);
+  });
+}
+
+//add a search component to the page for the browsers that support javascript
+$('.page-header').append('<div class="student-search"><input placeholder="Search for students..."><button>Search</button></div>');
+
+//listen for the click on the search button
+$('.student-search button').on('click', function(){
+  filterStudent($(this));
+  //assign to the jquery object containing the list of all students a new list
+  //with only filtered students
+  studentItem = $('.student-item:visible');
+  notFound();
   //generate page with filtered students
   showPage(1, studentItem);
   //generate page links based on students filtered
@@ -85,21 +95,11 @@ $('.student-search button').on('click', function(){
 
 //listen for text entered in the search box
 $('.student-search input').on('keyup', function(){
-  //create a variable to store the text entered in the search input
-  let inputValue = $(this).val().toLowerCase();
-  //filter the elements shown on the page based on text entered by the user
-  $('.student-item').filter(function(){
-    $(this).toggle($(this).text().toLowerCase().indexOf(inputValue) > -1);
-  });
+  filterStudent($(this));
   //assign to the jquery object containing the list of all students a new list
   //with only filtered students
   studentItem = $('.student-item:visible');
-  //clear h3 not found
-  $('.notfound').remove();
-  //if no user is found show a message to the user
-  if($('.student-item:visible').length === 0){
-    $('.page').append('<h3 class="notfound">Student Not Found</h3>');
-  }
+  notFound();
   //if all the text in the input is deleted show the last page the user was at
   if(!this.value){
     showPage($('.active').text(), studentItem);
