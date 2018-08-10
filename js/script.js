@@ -4,7 +4,7 @@ FSJS project 2 - List Filter and Pagination
 ******************************************/
 
 // Add variables that store DOM elements you will need to reference and/or manipulate
-const studentItem = $('.student-item');
+let studentItem = $('.student-item');
 
 //this function hide all of the items in the list except for
 //the ten that will be showed based on the page number
@@ -13,19 +13,17 @@ function showPage(pageNumber, studentList){
   studentList.hide();
   //loop through all the students in our student list argument
   studentList.each(function(index){
-    console.log($(this));
-    console.log(index);
     //check if student should be on this page number then show the student
     if((pageNumber * 10) > index && (pageNumber * 10 - 10) <= index){
       $(this).show();
-      console.log('aaaaaaaaaa')
     }
-  })
+  });
 }
 
 //call the showPage function to start showing page 1 with the first 10 students
 showPage(1, studentItem);
 
+//create the pagination div where we'll store the students li
 $('.page').append('<div class="pagination"><ul></ul></div>');
 
 //this function create page links based on the number of the students on the list and then
@@ -33,7 +31,7 @@ $('.page').append('<div class="pagination"><ul></ul></div>');
 function appendPageLinks(studentList){
   //determine how many pages for this student list
   let pageNumber = Math.ceil(studentList.length / 10);
-
+  //remove old li
   $('.pagination ul li').remove();
   //loop through all the pages, append the first page with the css class active, then append all the other pages
   for(let i = 1; i < pageNumber + 1; i++){
@@ -47,6 +45,7 @@ function appendPageLinks(studentList){
   updateCss(studentItem);
 }
 
+//this function call the showPage function to generate the right page based on which page the user clicks
 function updateCss(studentList){
   $('.pagination ul li').on('click', 'a', function(){
     showPage($(this).text(), studentList)
@@ -58,65 +57,55 @@ function updateCss(studentList){
 //call appendPageLinks to initialize the pages links based on number of students in the list
 appendPageLinks(studentItem);
 
-//this function filters the elements of the student list that are shown in the page at the moment
-//filtering by the css display property. then return a filtered jquery object that will
-//be used to create pages of 10 student when using the search feature
-
-// function calcPageSearch(){
-//     let displayed = $('.student-item').filter(function() {
-//     let element = $(this);
-//     if(element.css('display') == 'none') {
-//         element.remove();
-//         return false;
-//     }
-//     return true;
-//   });
-//   return displayed;
-// }
-
-function calcPageSearch(){
-  let count = 0;
-  $('.student-item').each(function(){
-    if($(this).css('display') !== 'none'){
-      count++;
-    }
-  });
-  console.log(`count: ${count}`);
-  return count;
-}
-
 //add a search component to the page for the browsers that support javascript
 $('.page-header').append('<div class="student-search"><input placeholder="Search for students..."><button>Search</button></div>');
 
 //listen for the click on the search button
 $('.student-search button').on('click', function(){
   //create a variable to store the text entered in the search input
-  let value = $('.student-search input').val().toLowerCase();
+  let inputValue = $('.student-search input').val().toLowerCase();
   //filter the elements shown on the page based on text entered by the user
-  let newList = $('.student-item').filter(function(){
-    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+  $('.student-item').filter(function(){
+    $(this).toggle($(this).text().toLowerCase().indexOf(inputValue) > -1);
   });
+  //assign to the jquery object containing the list of all students a new list
+  //with only filtered students
+  studentItem = $('.student-item:visible');
+  //clear h3 not found
+  $('.notfound').remove();
+  //if no user is found show a message to the user
+  if($('.student-item:visible').length === 0){
+    $('.page').append('<h3 class="notfound">Student Not Found</h3>');
+  }
+  //generate page with filtered students
+  showPage(1, studentItem);
+  //generate page links based on students filtered
+  appendPageLinks(studentItem);
 });
 
 //listen for text entered in the search box
 $('.student-search input').on('keyup', function(){
-  //let pageNumber = Math.ceil(calcPageSearch() / 10);
   //create a variable to store the text entered in the search input
-  let value = $(this).val().toLowerCase();
+  let inputValue = $(this).val().toLowerCase();
   //filter the elements shown on the page based on text entered by the user
   $('.student-item').filter(function(){
-    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+    $(this).toggle($(this).text().toLowerCase().indexOf(inputValue) > -1);
   });
-  let test = $('.student-item:visible');
-  console.log(test);
+  //assign to the jquery object containing the list of all students a new list
+  //with only filtered students
+  studentItem = $('.student-item:visible');
+  //clear h3 not found
+  $('.notfound').remove();
+  //if no user is found show a message to the user
+  if($('.student-item:visible').length === 0){
+    $('.page').append('<h3 class="notfound">Student Not Found</h3>');
+  }
   //if all the text in the input is deleted show the last page the user was at
   if(!this.value){
     showPage($('.active').text(), studentItem);
   }
-  let number = Math.ceil(calcPageSearch() / 10);
-  console.log(`number : ${number}`);
-  //showPage(number, test);
-  showPage(1, test);
-  appendPageLinks(test);
-
+  //generate page with filtered students
+  showPage(1, studentItem);
+  //generate page links based on students filtered
+  appendPageLinks(studentItem);
 });
