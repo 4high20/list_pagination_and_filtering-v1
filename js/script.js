@@ -116,6 +116,7 @@ $('.student-search input').on('keyup', function(){
   let number = Math.ceil(calcPageSearch() / 10);
   console.log(`number : ${number}`);
   //showPage(number, test);
+  showPage(1, test);
   appendPageLinks(test);
-  showPage(number, test);
+
 });
